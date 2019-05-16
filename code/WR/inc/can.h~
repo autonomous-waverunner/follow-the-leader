@@ -1,0 +1,15 @@
+#ifndef CAN_H
+#define CAN_H
+
+#include <linux/can.h>
+#include <linux/can/raw.h>
+
+class actuator {
+ public:
+  void init();
+  void send();
+  
+ private:
+};
+
+#endif //CAN_H

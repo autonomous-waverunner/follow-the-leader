@@ -1,0 +1,18 @@
+#ifndef COORDS_GEN_H
+#define COORDS_GEN_H
+
+#include <string>
+#include <vector>
+#include <fstream>
+#include <utility>
+
+class coords_gen {
+public:
+  coords_gen(std::string fname);
+  
+private:
+  int _coords_idx = 0;
+  std::vector<std::pair<double,double>> _coords;
+};
+
+#endif //COORDS_GEN_H

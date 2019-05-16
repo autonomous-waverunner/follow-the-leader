@@ -1,0 +1,11 @@
+#include <exception>
+
+#include "can.h"
+
+can::can(std::string ifname) {
+  if ((sockFD = socket(PF_CAN, SOCK_RAW, CAN_RAW)) < 0) {
+    throw std::exception::runtime_error;
+  }
+
+  
+}

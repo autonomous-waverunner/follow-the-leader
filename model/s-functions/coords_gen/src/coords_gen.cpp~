@@ -1,0 +1,36 @@
+#include <string>
+#include <vector>
+#include <fstream>
+#include <utility>
+
+class coords_gen {
+public:
+  coords_gen(std::string fname) {
+    std::ifstream coords_file (fname);
+    std::string line;
+    
+    if (coords_file.is_open()) {
+      while (getline(coords_file, line)) {
+	std::size_t ws_pos = line.find_first_of(" ");
+	std::size_t lat_pos = line.find_first_not_of(" ", ws_pos);
+	
+	std::string long_str = line.substr(0, ws_pos);
+	std::string lat_str = line.substr(lat_pos, line.length());
+
+	_coords.push_back(std::make_pair(std::stod(long_str), std::stod(lat_str)));
+      }
+      coords_file.close();
+    } else throw 1;
+  }
+
+  std::pair<double, double> get() {
+    auto elem = _coords[_coords_idx];
+    if (_coords_idx < _coords.size() - 1)
+      _coords_idx++;
+    return elem;
+  }
+  
+private:
+  int _coords_idx = 0;
+  std::vector<std::pair<double,double>> _coords;
+};
