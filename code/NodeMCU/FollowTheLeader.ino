@@ -303,9 +303,11 @@ char const webpage[] PROGMEM = R"=====(
 )=====";
 
 void setup(){
+  
   pinMode(LED_BUILTIN, OUTPUT);  
   Serial.begin(115200);
-  
+
+  /* Configure and setup WiFi settings */
   Serial.println(); 
   Serial.print("Setting soft-AP configuration ... ");
 
@@ -316,23 +318,30 @@ void setup(){
   Serial.println(WiFi.softAP("Follow the leader") ? "Ready" : "Failed!");
   Serial.print("Soft-AP IP address = ");
   Serial.println(WiFi.softAPIP());
-  
 
-
+  /* Configure the different routes in the routing table */
   server.on("/", [](){
      server.send_P(200, "text/html", webpage);
   });
   server.on("/restart", restartServer);
-  
+
+  /* Start the web server */
   server.begin();
 
+  /* start the websockets server */
   webSocket.begin();
+
+  /* Attach the eventHandler for different return messages */
   webSocket.onEvent(webSocketEvent);
 
+  /* Start USART on the mode with a given baudrate */
   nodemcu.begin(115200);
 
+  /* Explicitly configure the pins for Rx-Input and Tx-Output to ensure that they are in that mode */
   pinMode(13, INPUT);
   pinMode(15, OUTPUT);
+
+  /* Configure also the LED indicator that will show visuals for any internal activities */
   pinMode(LED, OUTPUT);  
 }
 
