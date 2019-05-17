@@ -324,7 +324,6 @@ void setup(){
   });
   server.on("/restart", restartServer);
   
-  //server.onNotFound(handleNotFound);
   server.begin();
 
   webSocket.begin();
@@ -334,8 +333,7 @@ void setup(){
 
   pinMode(13, INPUT);
   pinMode(15, OUTPUT);
-  pinMode(LED_D0, OUTPUT);
-  pinMode(LED, OUTPUT);    // LED pin as output.
+  pinMode(LED, OUTPUT);  
 }
 
 void loop() 
@@ -346,12 +344,7 @@ void loop()
     if ( nodemcu.available() ) 
     {
         digitalWrite(LED, LOW);
-        //String external_data = nodemcu.readString();
         Serial.write(nodemcu.read());
-        //char charBuf[70];
-        //char* buf = (char*) malloc(sizeof(char)*(external_data.length() + 1));
-        //external_data.toCharArray(buf, external_data.length() + 1);
-        //webSocket.broadcastTXT(external_data, strlen(external_data));
         digitalWrite(LED, HIGH);
     }
     if(Serial.available()) nodemcu.write(Serial.read());
@@ -359,13 +352,9 @@ void loop()
 
 void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t len)
 {
-    //Serial.printf("webSocketEvent(%d, %d, ...)\r\n", num, type);
     if(type == WStype_TEXT){
         digitalWrite(LED, LOW);
-        //String _payload = String((char *) &payload[0]);
         Serial.printf("%s\r\n", payload);
-        /*Serial.printf("[%u] get Text: %s\r\n", num, payload);*/
-        //webSocket.broadcastTXT(payload, len);
         digitalWrite(LED, HIGH);
     } 
 }
