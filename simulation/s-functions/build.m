@@ -1,11 +1,11 @@
 %% Build coords_gen.mex
-mex -Is-functions/coords_gen/src/ s-functions/coords_gen/src/s_coords_gen.cpp s-functions/coords_gen/src/coords_gen.cpp s-functions/coords_gen/src/UTM.cpp
+mex -Icoords_gen/src/ coords_gen/s_coords_gen.cpp coords_gen/src/coords_gen.cpp
 
 %% Build path_alg.mex
 includes = [
-    "s-functions/path_alg/inc/"
-    "s-functions/lib/eigen-eigen-323c052e1731/"
-    "s-functions/lib/lp-filter"
+    "../../code/WR/inc/"
+    "../../code/WR/lib/eigen-eigen-323c052e1731/"
+    "../../code/WR/lib/lp-filter"
 ];
 
 if ispc
@@ -16,15 +16,14 @@ if ispc
 end
 include_str = join(arrayfun(@(path) strcat("-I", path), includes),   " ");
 
-src_path = "s-functions/path_alg/src/";
+src_path = "../../code/WR/src/";
 sources  = [
-    "s_path_alg.cpp"
     "path_alg.cpp"
     "dist_to_path.cpp"
     "pid.cpp"
-    "../../lib/lp-filter/LowPassFilter.cpp"
+    "../lib/lp-filter/LowPassFilter.cpp"
 ];
-sources_str = join(arrayfun(@(src) strcat(src_path, src), sources), " ");
+sources_str = join(["./s_path_alg.cpp"; arrayfun(@(src) strcat(src_path, src), sources)], " ");
 
 if isunix
     lib_str = "-lproj";
