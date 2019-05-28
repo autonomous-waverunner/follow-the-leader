@@ -1,3 +1,9 @@
+%% S-functions build script
+
+% These scripts are used to build the s-functions used in the simulation
+% environment used in the project. Please see README.md for instructions
+% on usage.
+
 %% Build coords_gen.mex
 mex -Icoords_gen/src/ coords_gen/s_coords_gen.cpp coords_gen/src/coords_gen.cpp
 
