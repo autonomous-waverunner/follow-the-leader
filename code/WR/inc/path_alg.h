@@ -20,7 +20,7 @@
 
 const double pi =  3.14159265359;
 
-#define DEV  // Uncomment to turn on debugging messages
+//#define DEV  // Uncomment to turn on debugging messages
 #ifdef DEV
 #define S_FUNCTION_LEVEL 2
 #define S_FUNCTION_NAME  s_path_alg

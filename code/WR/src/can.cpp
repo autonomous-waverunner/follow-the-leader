@@ -36,7 +36,7 @@ ssize_t actuator::sendThrottle(double val) {
 ssize_t actuator::sendAngle(double val) {
   uint8_t data[2];
   double val_deg = val * 180 / pi;
-  int16_t nozzle = (int16_t) val_deg * 1000;
+  int16_t nozzle = (int16_t) val_deg * 100;
 
   data[1] = *((int8_t*) &nozzle);
   data[0] = *(((int8_t*) &nozzle) + 1);

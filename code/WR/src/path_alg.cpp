@@ -17,9 +17,9 @@ double constrainAngle(double x){
 
 path_track::path_track(double deltaT, double dist_ref, pid_v throttle, pid_v nozzle)
   : deltaT(deltaT),
-    dist_ref(dist_ref),
     pid_gas(throttle.Kp, throttle.Tf, throttle.Kd, throttle.Ki, throttle.max, throttle.min, throttle.scaling),
-    pid_nozzle_angle(nozzle.Kp, nozzle.Tf, nozzle.Kd, nozzle.Ki, nozzle.max, nozzle.min, nozzle.scaling)
+    pid_nozzle_angle(nozzle.Kp, nozzle.Tf, nozzle.Kd, nozzle.Ki, nozzle.max, nozzle.min, nozzle.scaling),
+    dist_ref(dist_ref)
 {
   res.gas = 0;
   res.nozzle_angle = 0;
@@ -75,7 +75,7 @@ void path_track::tick(Eigen::Vector2d wr_position, double wr_heading, double wr_
 
   if (coords.size() < 2 || state.alive == 0) {
     state.desired_rotation = state.wr_heading;
-    state.target = Eigen::Vector2d(0,0);
+    state.target = wr_position;//Eigen::Vector2d(0,0);
     state.distance_reference = 10000000;
     //    state.distance_to_lc = 0;
   } else {
@@ -94,6 +94,7 @@ void path_track::DIE() {
   //res.gas = 0;
   //res.nozzle_angle = 0;
   state.alive = 0;
+  std::cerr << "DIE" << std::endl;
 }
 
 /* 
@@ -114,9 +115,9 @@ int path_track::calculate_rotation() {
 
   // Loop through the X matrix (our path) to see which points the WR are
   // closest to at this moment.
-  double min_a = std::numeric_limits<double>::infinity();
-  int j = 0;
-  for (int i = 0; i < coords.size() - 1; i++) {
+  //double min_a = std::numeric_limits<double>::infinity();
+  unsigned int j = 0;
+  for (std::size_t i = 0; i < coords.size() - 1; i++) {
     // Handle points in the same place                                      TODO
     /*	if (coords[i] == coords[i + 1]){
 		// Pop either i or i + 1, Dosn't this get hard with a queue??
@@ -216,7 +217,7 @@ int path_track::calculate_rotation() {
   if (coords.size() > 1)
     dp.set(coords.at(j), coords.at(j + 1), state.target);
   
-  for (int i = j; (i + 2) < coords.size(); i++) {
+  for (std::size_t i = j; (i + 2) < coords.size(); i++) {
     //// ssPrintf("target How_far %f", dp.how_far);
     A = coords.at(i+1);
     B = coords.at(i+2);
@@ -263,7 +264,7 @@ void path_track::calculate_dist_to_lc(int GPSat) {
   double target_to_next = (A - state.target).norm();
   double dist_to_target = (state.target - state.wr_position).norm();
   state.distance_to_lc = dist_to_target + target_to_next;
-  for (int i = GPSat + 1; i < coords.size() - 1; i++) {
+  for (std::size_t i = GPSat + 1; i < coords.size() - 1; i++) {
     A = coords.at(i + 1) - coords.at(i);
     state.distance_to_lc += A.norm();
   }
@@ -278,8 +279,7 @@ void path_track::calculate_gas(double dt) {
     _gas = pid_gas._min;
   else if (_gas > pid_gas._max)
     _gas = pid_gas._max;
-    //res.gas = lpf_throttle.update(_gas, dt);
-    res.gas = _gas;
+  res.gas = lpf_throttle.update(_gas, dt);
   pid_gas.anti_windup(distance_error);
 }
 
@@ -298,12 +298,10 @@ void path_track::calculate_nozzle_angle(double dt) {
     gas = res.gas;
   }
 
-  //tau = tau/gas;
+  tau = tau/gas;
   if (tau < pid_nozzle_angle._min)
     tau = pid_nozzle_angle._min;
   else if (tau > pid_nozzle_angle._max)
     tau = pid_nozzle_angle._max;
-  
-  res.nozzle_angle = tau;
-  //res.nozzle_angle = lpf_nozzle.update(tau,dt);
+  res.nozzle_angle = lpf_nozzle.update(tau,dt);
 }

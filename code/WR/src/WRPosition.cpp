@@ -3,6 +3,10 @@
 
 struct wr_state WRState = { 0 };
 
+std::string stat(uint32 f, uint32 m) {
+  return std::to_string((f & m) - ((f & m) ? (m - 1) : 0));
+}
+
 SbgErrorCode onLogReceived(SbgEComHandle *pHandle,
 			  SbgEComClass msgClass,
 			  SbgEComMsgId msg,
@@ -10,25 +14,85 @@ SbgErrorCode onLogReceived(SbgEComHandle *pHandle,
 			  void *pUserArg) {
   switch (msg) {
   case SBG_ECOM_LOG_STATUS:
-    //std::cerr << "Received status" << std::endl;
+    gps_log << "STA " << std::endl;
+    /*    std::cerr << "Main power: " << stat(pLogData->statusData.generalStatus, SBG_ECOM_GENERAL_MAIN_POWER_OK)
+	      << " GPS power: " << stat(pLogData->statusData.generalStatus, SBG_ECOM_GENERAL_GPS_POWER_OK)
+	      << " Settings: " << stat(pLogData->statusData.generalStatus, SBG_ECOM_GENERAL_SETTINGS_OK)
+	      << " Temp: " << stat(pLogData->statusData.generalStatus, SBG_ECOM_GENERAL_TEMPERATURE_OK)
+	      << " Log: " << stat(pLogData->statusData.generalStatus, SBG_ECOM_GENERAL_DATALOGGER_OK)
+	      << " CPU: " << stat(pLogData->statusData.generalStatus, SBG_ECOM_GENERAL_CPU_OK)
+	      << std::endl;
+    std::cerr << "Port A OK: " << stat(pLogData->statusData.comStatus, SBG_ECOM_PORTA_VALID)
+	      << " Port A TX OK: " << stat(pLogData->statusData.comStatus, SBG_ECOM_PORTA_TX_OK)
+	      << " Port A RX OK: " << stat(pLogData->statusData.comStatus, SBG_ECOM_PORTA_RX_OK)
+	      << std::endl;
+    std::cerr << "GPS1 pos: " << stat(pLogData->statusData.aidingStatus, SBG_ECOM_AIDING_GPS1_POS_RECV)
+	      << " vel: " << stat(pLogData->statusData.aidingStatus, SBG_ECOM_AIDING_GPS1_VEL_RECV)
+	      << " hdt: " << stat(pLogData->statusData.aidingStatus, SBG_ECOM_AIDING_GPS1_HDT_RECV)
+	      << " utc: " << stat(pLogData->statusData.aidingStatus, SBG_ECOM_AIDING_GPS1_UTC_RECV)
+	      << " GPS2 pos: " << stat(pLogData->statusData.aidingStatus, SBG_ECOM_AIDING_GPS2_POS_RECV)
+	      << " vel: " << stat(pLogData->statusData.aidingStatus, SBG_ECOM_AIDING_GPS2_VEL_RECV)
+	      << " hdt: " << stat(pLogData->statusData.aidingStatus, SBG_ECOM_AIDING_GPS2_HDT_RECV)
+	      << " utc: " << stat(pLogData->statusData.aidingStatus, SBG_ECOM_AIDING_GPS2_UTC_RECV)
+	      << std::endl;*/
     break;
   case SBG_ECOM_LOG_UTC_TIME:
-    //std::cerr << "Received utc" << std::endl;
+    gps_log << "UTC "
+	    << pLogData->utcData.timeStamp
+	    << std::endl;
     WRState.time = pLogData->utcData.timeStamp;
     break;
   case SBG_ECOM_LOG_GPS1_VEL:
-    //std::cerr << "Received velocity" << std::endl;
+    gps_log << "VEL "
+	    << sqrt(pow(pLogData->gpsVelData.velocity[0], 2) +
+		    pow(pLogData->gpsVelData.velocity[1], 2))
+	    << std::endl;
     WRState.velocity = sqrt(pow(pLogData->gpsVelData.velocity[0], 2) +
 			     pow(pLogData->gpsVelData.velocity[1], 2));
     break;
   case SBG_ECOM_LOG_GPS1_POS:
-    //std::cerr << "Received position" << std::endl;
-    WRState.position = Eigen::Vector2d(pLogData->gpsPosData.latitude,
-				       pLogData->gpsPosData.longitude);
+    gps_log << "POS "
+	    << pLogData->gpsPosData.latitude << "," << pLogData->gpsPosData.longitude
+	    << std::endl;
+    //    std::cerr << "GPS POS Sats: " << std::to_string(pLogData->gpsPosData.numSvUsed)
+    projPJ pj_utm, pj_latlong;
+    double x, y;
+  
+    if (!(pj_utm = pj_init_plus("+proj=utm +zone=32")) )
+      throw 255;
+    if (!(pj_latlong = pj_init_plus("+proj=latlong +ellps=WGS84")) )
+      throw 255;
+
+    x = pLogData->gpsPosData.latitude * DEG_TO_RAD;
+    y = pLogData->gpsPosData.longitude * DEG_TO_RAD;
+    if (pj_transform(pj_latlong, pj_utm, 1, 1, &x, &y, NULL ))
+      throw 255;
+
+    WRState.position = Eigen::Vector2d(x, y);
     break;
   case SBG_ECOM_LOG_GPS1_HDT:
-    //std::cerr << "Received heading" << std::endl;
-    WRState.heading = pLogData->gpsHdtData.heading;
+    gps_log << "HDT "
+	    << pLogData->gpsHdtData.heading
+	    << std::endl;
+    
+    double heading;
+    if (pLogData->gpsHdtData.heading > 180)
+      heading = pLogData->gpsHdtData.heading - 360;
+    else
+      heading = pLogData->gpsHdtData.heading;
+    WRState.heading = heading * 3.1415926535 / 180;
+    break;
+  case SBG_ECOM_LOG_EKF_NAV:
+    gps_log << "EKF POS "
+	    << pLogData->ekfNavData.position[0] << ", "
+	    << pLogData->ekfNavData.position[1] << ", "
+	    << pLogData->ekfNavData.position[2]
+	    << std::endl;
+    gps_log << "EKF VEL "
+	    << pLogData->ekfNavData.velocity[0] << ", "
+	    << pLogData->ekfNavData.velocity[1] << ", "
+	    << pLogData->ekfNavData.velocity[2]
+	    << std::endl;
     break;
   }
 }
@@ -37,10 +101,13 @@ void getWRPosition(std::string dev) {
   SbgEComHandle comHandle;
   SbgErrorCode sbgErr;
   SbgInterface sbgInterface;
-  int32 retValue = 0;
-  SbgEComDeviceInfo devInfo;
+  //int32 retValue = 0;
+  //SbgEComDeviceInfo devInfo;
 
-  sbgErr = sbgInterfaceSerialCreate(&sbgInterface, dev.c_str(), 921600);
+  /* The baud rate is limited to 115200 due to the RS232 <-> TTL 5V conversion;
+     higher baud rates result in corrupt data. One possible solution for this is
+     to change the MAX202 chip to a MAX3232 which have correct logic levels */
+  sbgErr = sbgInterfaceSerialCreate(&sbgInterface, dev.c_str(), 115200);
   
   if (sbgErr == SBG_NO_ERROR) {
     sbgErr = sbgEComInit(&comHandle, &sbgInterface);

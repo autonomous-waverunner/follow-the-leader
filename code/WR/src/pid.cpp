@@ -12,7 +12,7 @@
 
 pid::pid(double Kp, double Tf, double Kd, double Ki,
 	 double min, double max, double scaling)
-  : Kp(Kp), Tf(Tf), Kd(Kd), Ki(Ki), _min(min), _max(max), scaling(scaling) {}
+  : _min(min), _max(max), Kp(Kp), Tf(Tf), Kd(Kd), Ki(Ki), scaling(scaling) {}
 
 double pid::step(double e, double dt) {
   

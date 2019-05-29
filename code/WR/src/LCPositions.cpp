@@ -5,11 +5,15 @@ config new_config = { 0 };
 State state = PARAMS;
 path_track* pp;
 
+//#define EMULATION
+
+#ifndef EMULATION
+
 int initRadio(std::string dev) {
   int fd = open(dev.c_str(), O_RDWR | O_NOCTTY | O_NDELAY);
 
   if (fd == -1) {
-    std::cerr << "Error opening " << dev << std::endl;
+    lc_log << "Error opening " << dev << std::endl;
     exit(1);
   }
 
@@ -32,7 +36,8 @@ int initRadio(std::string dev) {
   SerialPortSettings.c_cflag |= CREAD | CLOCAL;
 
   SerialPortSettings.c_iflag &= ~(IXON | IXOFF | IXANY);
-  SerialPortSettings.c_iflag &= ~(ICANON | ECHO | ECHOE | ISIG);
+  SerialPortSettings.c_iflag &= ~(ECHO | ECHOE | ISIG);
+  //SerialPortSettings.c_iflag &= ~(ICANON | ECHO | ECHOE | ISIG);
 
   SerialPortSettings.c_oflag &= ~OPOST;
 
@@ -41,7 +46,7 @@ int initRadio(std::string dev) {
   SerialPortSettings.c_cc[VTIME] = 0; /* Wait indefinetly   */
 
   if((tcsetattr(fd,TCSANOW,&SerialPortSettings)) != 0) {
-    std::cerr << "ERROR ! in Setting attributes" << std::endl;
+    lc_log << "ERROR ! in Setting attributes" << std::endl;
     exit(1);
   }
 
@@ -55,52 +60,52 @@ int initRadio(std::string dev) {
 #define BUFSIZE 1024
 
 void getLCPositions(int fd) {
-  uint8_t buf[BUFSIZE];
   while (true) {
+    uint8_t buf[BUFSIZE];
     ssize_t sz = read(fd, &buf, BUFSIZE);
-
+    buf[sz] = 0;
     if (sz > 0) {
-      std::cerr << "Read " << std::to_string(sz) << " bytes:" << std::endl
-		<< buf << std::endl;
+      //lc_log << "Read " << std::to_string(sz) << " bytes:" << std::endl
+      //	<< buf << std::endl;
       
       // Should verify integrity of message here
       switch (buf[0]) {
       case C_COORDINATES:
-	std::cerr << "COORDINATES STATE" << std::endl;
+	//lc_log << "COORDINATES STATE" << std::endl;
 	state = COORDINATES;
 	break;
       case C_WAIT:
-	std::cerr << "WAIT STATE" << std::endl;
+	//lc_log << "WAIT STATE" << std::endl;
 	state = WAIT;
 	break;
       case C_PARAMS:
-	std::cerr << "PARAMS STATE" << std::endl;
+	//lc_log << "PARAMS STATE" << std::endl;
 	state = PARAMS;
 	break;
       }
-      char* msg = buf + 2;
+      uint8_t* msg = buf + 2;
       switch (state) {
       case COORDINATES:
-	std::cerr << "case COORDINATES" << std::endl;
+	//lc_log << "case COORDINATES" << std::endl;
 	if (pp) {
 	  try {
 	    msg_coordinate m = parse_coordinates(msg);
-	    std::cerr << "Utc: " << m.utc
-		      << "  Lat: " << m.latitude
-		      << "  Lon: " << m.longitude << std::endl;
+	    lc_log << std::setprecision(12)
+		   << m.latitude
+		   << ", " << m.longitude << std::endl;
 	    Eigen::Vector2d new_coord(m.latitude, m.longitude);
 	    pp->push_coord(new_coord);
 	  } catch (const std::exception& e) {
-	    std::cerr << "invalid coordinates msg: " << e.what() << std::endl;
+	    lc_log << "invalid coordinates msg: " << e.what() << std::endl;
 	  } catch (...) {
-	    std::cerr << "invalid coordinates msg" << std::endl;
+	    lc_log << "invalid coordinates msg" << std::endl;
 	  }
 	}
 	break;
       case WAIT:
 	break;
       case PARAMS:
-	std::cerr << "case PARAMS" << std::endl;
+	//lc_log << "case PARAMS" << std::endl;
 	try {
 	  msg_parameters m = parse_parameters(msg);
 	  new_config.throttle = m.throttle;
@@ -108,9 +113,9 @@ void getLCPositions(int fd) {
 	  new_config.deltaT = m.deltaT;
 	  new_config.dist_ref = m.dist_ref;
 	} catch (const std::exception& e) {
-	    std::cerr << "invalid params msg: " << e.what() << std::endl;
+	    lc_log << "invalid params msg: " << e.what() << std::endl;
 	} catch (...) {
-	  std::cerr << "invalid params msg" << std::endl;
+	  lc_log << "invalid params msg" << std::endl;
 	}
 	break;
       }
@@ -118,6 +123,28 @@ void getLCPositions(int fd) {
     sleep(0.01);
   }
 }
+
+#else
+#include <fstream>
+
+int initRadio(std::string dev) {
+  return 255;
+}
+
+void getLCPositions(int fd) {
+  std::ifstream coords;
+  coords.open("../../../model/test3.txt");
+  std::string coord_str;
+
+  if(coords.is_open()) {
+    while (getline(coords, coord_str)) {
+      lc_log << coord_str << std::endl;
+      usleep(500*1000);
+    }
+  }
+}
+
+#endif
 
 config getUpdatedConfig() {
   return new_config;

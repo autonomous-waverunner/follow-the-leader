@@ -68,19 +68,34 @@ uint64_t micros() {
   return std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
 }
 
+std::ofstream gps_log;
+std::ofstream lc_log;
+std::ofstream out_log;
 
 #include <time.h>
 int main(int argc, char* argv[]) {
+  std::cerr << "Reading init" << std::endl;
   config cfg = initFromConfig("parameters.cfg");
-  //printParams(std::cerr, cfg);
+  printParams(std::cerr, cfg);
 
   time_t now = time(0);
   struct tm tstruct;
-  char log_file[80];
+  char log_file[100];
   tstruct = *localtime(&now);
-  strftime(log_file, sizeof(log_file), "%Y-%m-%d.%X.log", &tstruct);
+  strftime(log_file, sizeof(log_file), "/home/nvidia/eenx151902/log/%Y-%m-%d.%X.var.log", &tstruct);
   std::ofstream log;
   log.open(log_file, std::ofstream::out);
+
+  strftime(log_file, sizeof(log_file), "/home/nvidia/eenx151902/log/%Y-%m-%d.%X.gps.log", &tstruct);
+  gps_log.open(log_file, std::ofstream::out);
+
+  strftime(log_file, sizeof(log_file), "/home/nvidia/eenx151902/log/%Y-%m-%d.%X.lc.log", &tstruct);
+  lc_log.open(log_file, std::ofstream::out);
+
+  strftime(log_file, sizeof(log_file), "/home/nvidia/eenx151902/log/%Y-%m-%d.%X.out.log", &tstruct);
+  out_log.open(log_file, std::ofstream::out);
+
+  std::cerr << "Log files opened" << std::endl;
   
   /*
   // BEGIN CAN TESTING
@@ -108,24 +123,35 @@ int main(int argc, char* argv[]) {
 
   // END CAN TESTING
   */
+
+  std::cerr << "Initialize radio" << std::endl;
   
   int radioFD = initRadio("/dev/tty_ftl_radio");
   std::thread threadLCPos (getLCPositions, radioFD);
+
+  std::cerr << "Initialize GPS" << std::endl;
   
   // UART is mapped to /dev/ttyTHS0
   std::thread threadWRPos (getWRPosition, "/dev/ttyTHS0");
 
   actuator act("can0");
+
+  std::cerr << "Can initialized" << std::endl;
   /*
+  act.sendAngle(24*pi/180);
+  while(1);
+  
+  
   while (1) {
-  for (int i = -24; i < 25; i += 1) {
+  for (int i = -24; i <= 24; i += 1) {
     act.sendAngle(i*pi/180);
     usleep(100000);
   }
-  for (int i = 24; i > -25; i -= 1) {
+  for (int i = 24; i >= -24; i -= 1) {
     act.sendAngle(i*pi/180);
     usleep(100000);
-  }
+  }*/
+  /*
   for (int i = 0; i <= 100; i++) {
     act.sendThrottle(i);
     usleep(100000);
@@ -133,15 +159,18 @@ int main(int argc, char* argv[]) {
   for (int i = 100; i >= 0; i--) {
     act.sendThrottle(i);
     usleep(100000);
-  }
-  }
-  */
+    }
+    }*/
+  
 
   while (true) {
     uint64_t then = micros();
     path_track p = path_track(cfg.deltaT, cfg.dist_ref, cfg.throttle, cfg.nozzle);
     pp = &p;
     //printStateHeader(std::cerr);
+
+    std::cerr << "-> state COORDINATES" << std::endl;
+    
     while (state == COORDINATES) {
       // Keep track of time
       uint64_t now = micros();
@@ -162,6 +191,7 @@ int main(int argc, char* argv[]) {
       result res = p.get_results();
       act.sendThrottle(res.gas);
       act.sendAngle(res.nozzle_angle);
+      out_log << res.gas << ", " << res.nozzle_angle << std::endl;
 
       // Do some pretty-printing if attached terminal
       //printState(std::cerr, dt);
@@ -170,12 +200,13 @@ int main(int argc, char* argv[]) {
       usleep(EXTRA_DELAY);
     }
 
+    std::cerr << "-> state PARAMS" << std::endl;
+
     while (state == PARAMS) {
       pp = nullptr;
       cfg = getUpdatedConfig();
       sleep(1);
     }
-    
   }
 
   threadLCPos.join();

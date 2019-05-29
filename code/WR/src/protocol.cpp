@@ -56,7 +56,6 @@ msg_coordinate parse_coordinates (uint8_t* buf) {
   }
 
   try {
-    msg.utc = std::stod(tokens[0]);
     msg.latitude = fixCoord(tokens[1]);
     msg.longitude = fixCoord(tokens[2]);
   } catch (...) {

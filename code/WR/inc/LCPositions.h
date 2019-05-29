@@ -2,6 +2,7 @@
 #define LCPOSITIONS_H
 
 #include <iostream>
+#include <iomanip>
 #include <fstream>
 #include <string>
 #include <sys/poll.h>
@@ -11,6 +12,8 @@
 
 #include "path_alg.h"
 #include "protocol.h"
+
+extern std::ofstream lc_log;
 
 // More states may be added
 enum State {COORDINATES, WAIT, PARAMS};
