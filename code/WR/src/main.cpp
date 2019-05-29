@@ -75,7 +75,7 @@ std::ofstream out_log;
 #include <time.h>
 int main(int argc, char* argv[]) {
   std::cerr << "Reading init" << std::endl;
-  config cfg = initFromConfig("parameters.cfg");
+  config cfg = initFromConfig("../parameters.cfg");
   printParams(std::cerr, cfg);
 
   time_t now = time(0);

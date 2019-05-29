@@ -3,3 +3,4 @@
 *.mex*
 slprj/
 *.autosave
+build/

@@ -1,10 +1,10 @@
 cmake_minimum_required (VERSION 2.6)
 project (follow-the-leader)
 
-set(PATH_ALG "../../model/s-functions/path_alg")
-set(EIGEN "../../model/s-functions/lib/eigen-eigen-323c052e1731")
-set(LPFILTER "../../model/s-functions/lib/lp-filter")
-get_filename_component(SBGECOM "../sbgECom" ABSOLUTE)
+set(PATH_ALG ".")
+set(EIGEN "./lib/eigen-eigen-323c052e1731/")
+set(LPFILTER "./lib/lp-filter")
+get_filename_component(SBGECOM "./lib/sbgECom" ABSOLUTE)
 
 include_directories(
   inc
