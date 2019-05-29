@@ -1,7 +1,7 @@
 # WaveRunner code and configuration
 
-This directory holds code and configuration for the WR. The source code authored by the project team resides under `src/` and `inc/`,
-`lib/` hold third-party libraries used in the program.
+This directory holds code and configuration for the WR. The source code authored by the project team resides under `src/`, `inc/` and `etc/`,
+`lib/` hold third-party libraries used in the program. 
 
 ## Compiling
 
@@ -20,7 +20,7 @@ manually.
 ## Administration
 
 A few configuration files and scripts are used to setup the Xavier for the purposes of the project, these can be found under
-`etc/`. Information about these files and where they should be installed in the system is 
+`conf/`. Information about these files and where they should be installed in the system is 
 
 - `ftl.service`
   
