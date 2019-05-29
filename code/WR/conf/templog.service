@@ -1,0 +1,13 @@
+[Unit]
+Description=Temperature logger
+
+[Service]
+Type=simple
+WorkingDirectory=/home/nvidia/
+ExecStart=/usr/bin/python3 -u /home/nvidia/follow-the-leader/code/WR/etc/getSystemInformation.py
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=templogger
+
+[Install]
+WantedBy=multi-user.target

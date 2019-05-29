@@ -1,0 +1,12 @@
+[Unit]
+Description=Autonomous Wave Runner / Follow The Leader algorithm
+
+[Service]
+Type=simple
+WorkingDirectory=/home/nvidia/follow-the-leader/code/WR/build
+ExecStart=/home/nvidia/follow-the-leader/code/WR/build/ftl
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

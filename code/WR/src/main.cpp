@@ -82,17 +82,17 @@ int main(int argc, char* argv[]) {
   struct tm tstruct;
   char log_file[100];
   tstruct = *localtime(&now);
-  strftime(log_file, sizeof(log_file), "/home/nvidia/eenx151902/log/%Y-%m-%d.%X.var.log", &tstruct);
+  strftime(log_file, sizeof(log_file), "/home/nvidia/follow-the-leader/log/%Y-%m-%d.%X.var.log", &tstruct);
   std::ofstream log;
   log.open(log_file, std::ofstream::out);
 
-  strftime(log_file, sizeof(log_file), "/home/nvidia/eenx151902/log/%Y-%m-%d.%X.gps.log", &tstruct);
+  strftime(log_file, sizeof(log_file), "/home/nvidia/follow-the-leader/log/%Y-%m-%d.%X.gps.log", &tstruct);
   gps_log.open(log_file, std::ofstream::out);
 
-  strftime(log_file, sizeof(log_file), "/home/nvidia/eenx151902/log/%Y-%m-%d.%X.lc.log", &tstruct);
+  strftime(log_file, sizeof(log_file), "/home/nvidia/follow-the-leader/log/%Y-%m-%d.%X.lc.log", &tstruct);
   lc_log.open(log_file, std::ofstream::out);
 
-  strftime(log_file, sizeof(log_file), "/home/nvidia/eenx151902/log/%Y-%m-%d.%X.out.log", &tstruct);
+  strftime(log_file, sizeof(log_file), "/home/nvidia/follow-the-leader/log/%Y-%m-%d.%X.out.log", &tstruct);
   out_log.open(log_file, std::ofstream::out);
 
   std::cerr << "Log files opened" << std::endl;
