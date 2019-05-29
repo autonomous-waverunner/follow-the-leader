@@ -35,10 +35,16 @@ A few configuration files and scripts are used to setup the Xavier for the purpo
 
   *Installation location:* `/etc/systemd/system`
   
-  *Description:* Systemd service file for the temperature logger.
+  *Description:* Systemd service file for the temperature logger. The actual temperature logger is the python script
+  `etc/getSystemInformation.py`.
   
 - `???.sh`
 
   *Installation location:* `/etc/`
   
   *Description:* Configure the relevant pins for CAN functionality ([documentation](https://github.com/hmxf/can_xavier)).
+
+## Logs
+
+Various log files are produced when running the system. These can be found in `/var/log/temperature.log` and in
+`/home/nvidia/eenx151902/logs`. 
