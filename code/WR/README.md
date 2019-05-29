@@ -20,7 +20,7 @@ manually.
 ## Administration
 
 A few configuration files and scripts are used to setup the Xavier for the purposes of the project, these can be found under
-`etc/`. Information about these files and where they should be installed in the system is given in the following table:
+`etc/`. Information about these files and where they should be installed in the system is 
 
 - `ftl.service`
   
@@ -30,6 +30,12 @@ A few configuration files and scripts are used to setup the Xavier for the purpo
   the program upon starting the system. Basic usage is `sudo systemctl status ftl` to query the status of the system, 
   `sudo systemctl stop ftl` to stop the system and `sudo systemctl start ftl` to start it.
   For further instructions on using systemd, see e.g. [ArchWiki](https://wiki.archlinux.org/index.php/Systemd).
+  
+- `templog.service`
+
+  *Installation location:* `/etc/systemd/system`
+  
+  *Description:* Systemd service file for the temperature logger.
   
 - `???.sh`
 
