@@ -5,7 +5,7 @@ The code was implemented for [ST-Nucleo-F303](https://os.mbed.com/platforms/ST-N
 using [Visual Studio IDE](https://visualstudio.microsoft.com/) with [VisualGDB](https://visualgdb.com/) extension. However, other libraries like [HAL](http://stm32f4-discovery.net/2015/07/all-stm32-hal-libraries/) 
 should produce the same results with little changes. 
 
-We've tried as much as possible to make the documentation clear but otherwise, the macros used are self-documenting. 
+We've tried to make the documentation as clear as possible, but otherwise, the macros used are self-documenting. 
 
 ## NodeMCU 
 
