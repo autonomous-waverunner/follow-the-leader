@@ -9,7 +9,8 @@ We've tried to make the documentation as clear as possible, but otherwise, the m
 
 ## NodeMCU 
 
-The code found in this folder is written for [NodeMCU](https://en.wikipedia.org/wiki/NodeMCU) using the [Arduino IDE](https://www.arduino.cc/en/Main/Software). Note however, that
+The code found in this folder is written for [NodeMCU](https://en.wikipedia.org/wiki/NodeMCU){: .btn .btn-primary }
+ using the [Arduino IDE](https://www.arduino.cc/en/Main/Software). Note however, that
 arduino IDE has to be [configured](https://github.com/esp8266/Arduino) to work with esp8266 devices. 
 
 It is important to note that the code configures the device to generate its own local wifi network running with SSID "Follow the leader" 
