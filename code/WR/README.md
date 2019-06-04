@@ -38,7 +38,7 @@ A few configuration files and scripts are used to setup the Xavier for the purpo
   *Description:* Systemd service file for the temperature logger. The actual temperature logger is the python script
   `etc/getSystemInformation.py`.
   
-- `???.sh`
+- `enable_CAN.sh`
 
   *Installation location:* `/etc/`
   
